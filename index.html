@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Irrigation</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h2>Smart Irrigation Predictor</h2>
+    <form method="POST">
+        <label>Temperature (°C):</label>
+        <input name="temp" type="number" step="0.1"><br>
+        <label>Humidity (%):</label>
+        <input name="humidity" type="number" step="0.1"><br>
+        <label>Soil Moisture (%):</label>
+        <input name="soil" type="number" step="0.1"><br>
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+        <h3>Prediction: {{ prediction }}</h3>
+    {% endif %}
+
+    <div id="chart"></div>
+    <script>
+        var times = {{ logs | map(attribute='Time') | list }};
+        var preds = {{ logs | map(attribute='Prediction') | list }};
+
+        var trace = {
+            x: times,
+            y: preds.map(p => p === "Irrigation Needed" ? 1 : 0),
+            type: 'scatter',
+            mode: 'lines+markers',
+            line: { color: 'green' }
+        };
+
+        Plotly.newPlot('chart', [trace], {
+            title: "Recent Predictions",
+            yaxis: { tickvals: [0, 1], ticktext: ["No", "Yes"] }
+        });
+    </script>
+</body>
+</html>
